@@ -45,7 +45,7 @@ typedef enum {
     //создаются клетки и фигуры
     [self createCellsAndCheckers: self.chessBoard];
     
-    [self.view addSubview:self.chessBoard];
+    [self.view addSubview: self.chessBoard];
 }
 
 -(void) createCellsAndCheckers: (UIView*) chessBoard {
@@ -87,7 +87,7 @@ typedef enum {
 }
 
 -(UIColor*) randomColor {
-    return [UIColor colorWithRed:0.1 + (arc4random_uniform(100) * 0.01) green:0.1 + (arc4random_uniform(100) * 0.01) blue: 0.1 + (arc4random_uniform(100) * 0.01) alpha:0.4];
+    return [UIColor colorWithRed:0.1 + (arc4random_uniform(100) * 0.01) green:0.1 + (arc4random_uniform(100) * 0.01) blue: 0.1 + (arc4random_uniform(100) * 0.01) alpha:0.8];
 }
 //метод перетасовыающий шашки и меняющий цвет черных клеток
 -(void) shuffleCheckersAndColorBlackCells: (UIView*) chessBoard {
@@ -111,9 +111,45 @@ typedef enum {
             while (![[chessBoard.subviews objectAtIndex: indexWhiteChecker] viewWithTag:TagWhiteChecker]) {
                 indexWhiteChecker = arc4random_uniform((UInt32)self.chessBoard.subviews.count - 1 );
             }
+            while (![[chessBoard.subviews objectAtIndex: indexRedChecker] viewWithTag:TagRedChecker]) {
+                indexRedChecker = arc4random_uniform((UInt32)self.chessBoard.subviews.count - 1 );
+            }
+            
+            //создаем белые и красные шашки
+            whiteChecherOrigin = [chessBoard.subviews objectAtIndex:indexWhiteChecker].frame.origin;
+            redCheckerOrigin = [chessBoard.subviews objectAtIndex:indexRedChecker].frame.origin;
+            
+            
+            [chessBoard.subviews objectAtIndex:indexWhiteChecker].frame = CGRectMake(redCheckerOrigin.x,
+                                                                                     redCheckerOrigin.y,
+                                                                                     CGRectGetWidth([chessBoard.subviews objectAtIndex:indexWhiteChecker].frame),
+                                                                                     CGRectGetHeight([chessBoard.subviews objectAtIndex:indexWhiteChecker].frame));
+            
+            [chessBoard.subviews objectAtIndex:indexRedChecker].frame = CGRectMake(whiteChecherOrigin.x,
+                                                                                     whiteChecherOrigin.y,
+                                                                                     CGRectGetWidth([chessBoard.subviews objectAtIndex:indexRedChecker].frame),
+                                                                                     CGRectGetHeight([chessBoard.subviews objectAtIndex:indexRedChecker].frame));
+            
+            [chessBoard exchangeSubviewAtIndex:indexWhiteChecker withSubviewAtIndex:indexRedChecker];
         }
     }];
 }
+
+
+
+//стандартный метод  apple
+-(void) viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
+        // определяем центр как сeрединиу самой вью
+        self.chessBoard.center = CGPointMake(CGRectGetWidth(self.view.frame) / 2, CGRectGetHeight(self.view.frame) / 2);
+    } completion:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
+        //вызываем созданный выше метод перетасовывающий шашки
+        [self shuffleCheckersAndColorBlackCells:self.chessBoard];
+    }];
+    
+             [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+}
+    
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
